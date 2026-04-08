@@ -96,10 +96,10 @@ export default function Index() {
         </motion.section>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass rounded-2xl p-6 mb-8 space-y-4">
-          <p className="text-sm text-muted-foreground">Type a code (e.g. F26A5 or 8900351614516) or use voice input</p>
+          <p className="text-sm text-muted-foreground">Type a code (e.g. A1A1 or 8900351614516) or use voice input</p>
           <div className="flex gap-2">
             <Input
-              placeholder="F26A5 or 8900351614516"
+              placeholder="A1A1 or 8900351614516"
               value={value}
               onChange={(e) => setValue(e.target.value.toUpperCase())}
               maxLength={24}
