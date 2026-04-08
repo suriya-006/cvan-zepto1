@@ -11,7 +11,7 @@ import { QRCodeCanvas } from 'qrcode.react';
 
 export default function Index() {
   const { codes, isLoading, addCode } = useCodes();
-  const [lastCode, setLastCode] = useState<string | null>(null);
+  const [selectedCode, setSelectedCode] = useState<string | null>(null);
   const [value, setValue] = useState('');
   const [listening, setListening] = useState(false);
   const [activeLetter, setActiveLetter] = useState('A');
@@ -19,11 +19,15 @@ export default function Index() {
 
   const preview = parseInput(value);
 
-  const handleGenerate = () => {
-    if (preview) {
-      setLastCode(preview);
-      addCode.mutate(preview);
+  // Find matching code from saved codes
+  const matchingCode = preview ? codes.find(c => c.code === preview) : null;
+
+  const handleSearch = () => {
+    if (matchingCode) {
+      setSelectedCode(matchingCode.code);
       setValue('');
+    } else if (preview) {
+      toast.error(`Code "${preview}" not found in database`);
     }
   };
 
