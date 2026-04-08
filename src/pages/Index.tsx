@@ -193,11 +193,11 @@ export default function Index() {
                 </div>
                 <div className="flex gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
                   <button
-                    onClick={() => { navigator.clipboard.writeText(c.code); toast.success('Copied!'); }}
-                    className="w-8 h-8 rounded-lg bg-secondary/80 flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-secondary transition-colors"
-                    title="Copy code"
+                    onClick={() => { setLastCode(c.code); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                    className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary hover:bg-primary/30 transition-colors"
+                    title="Show QR"
                   >
-                    <Copy className="w-3.5 h-3.5" />
+                    <QrCode className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={() => handleDownloadQR(c.code)}
