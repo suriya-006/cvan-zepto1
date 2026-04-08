@@ -11,7 +11,7 @@ export function useCodes() {
       const { data, error } = await supabase
         .from('codes')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('code', { ascending: true });
       if (error) throw error;
       return data as { id: string; code: string; created_at: string }[];
     },

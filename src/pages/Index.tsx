@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { QrCode, Mic, MicOff, Zap, Download, QrCodeIcon } from 'lucide-react';
+import { QrCode, Mic, MicOff, Zap, Download, QrCodeIcon, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import QRPreview from '@/components/QRPreview';
@@ -130,69 +130,92 @@ export default function Index() {
         </div>
 
         {/* Generated Codes by Letter */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass rounded-2xl p-6">
-          <h2 className="text-lg font-heading font-semibold text-foreground mb-4">Generated Codes by Letter</h2>
-
-          {/* Letter tabs */}
-          <div className="flex flex-wrap gap-1.5 mb-4">
-            {FIRST_LETTERS.map((letter) => (
-              <button
-                key={letter}
-                onClick={() => setActiveLetter(letter)}
-                className={`w-9 h-9 rounded-lg text-sm font-bold transition-all ${
-                  activeLetter === letter
-                    ? 'bg-primary text-primary-foreground neon-glow-sm'
-                    : 'bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/80'
-                }`}
-              >
-                {letter}
-              </button>
-            ))}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-xl font-heading font-bold text-foreground">Generated Codes</h2>
+            <span className="text-xs font-mono px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+              {isLoading ? '...' : `${codes.length} total`}
+            </span>
           </div>
 
-          <p className="text-sm text-muted-foreground mb-3">
-            {isLoading ? 'Loading...' : `${filteredCodes.length} codes generated`}
-          </p>
+          {/* Letter tabs */}
+          <div className="glass rounded-2xl p-4 mb-4">
+            <p className="text-xs text-muted-foreground mb-3 uppercase tracking-wider font-semibold">Filter by letter</p>
+            <div className="flex flex-wrap gap-1.5">
+              {FIRST_LETTERS.map((letter) => {
+                const count = codes.filter(c => getFirstLetter(c.code) === letter).length;
+                return (
+                  <button
+                    key={letter}
+                    onClick={() => setActiveLetter(letter)}
+                    className={`relative w-10 h-10 rounded-xl text-sm font-bold transition-all duration-200 ${
+                      activeLetter === letter
+                        ? 'bg-primary text-primary-foreground neon-glow-sm scale-105'
+                        : 'bg-secondary/80 text-muted-foreground hover:text-foreground hover:bg-secondary hover:scale-105'
+                    }`}
+                  >
+                    {letter}
+                    {count > 0 && (
+                      <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-accent text-[9px] font-bold flex items-center justify-center text-accent-foreground">
+                        {count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
-          {/* Code list */}
-          <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
+          {/* Code cards */}
+          <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1 scrollbar-thin">
+            {filteredCodes.length === 0 && !isLoading && (
+              <div className="glass rounded-2xl p-8 text-center">
+                <QrCodeIcon className="w-10 h-10 mx-auto text-muted-foreground/30 mb-3" />
+                <p className="text-sm text-muted-foreground">No codes for letter <span className="text-primary font-bold">{activeLetter}</span></p>
+              </div>
+            )}
             {filteredCodes.map((c, i) => (
               <motion.div
                 key={c.id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.03 }}
-                className="glass rounded-xl px-4 py-3 flex items-center justify-between"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.025, duration: 0.3 }}
+                className="group glass rounded-xl px-4 py-3 flex items-center justify-between hover:border-primary/30 transition-all duration-200"
               >
-                <div>
-                  <p className="font-mono text-sm font-semibold text-primary">{c.code}</p>
-                  <p className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleDateString()}</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-mono text-xs font-bold border border-primary/20">
+                    {i + 1}
+                  </div>
+                  <div>
+                    <p className="font-mono text-sm font-semibold text-primary neon-text">{c.code}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">{new Date(c.created_at).toLocaleString()}</p>
+                  </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
                   <button
-                    onClick={() => {
-                      const el = document.getElementById(`qr-hidden-${c.id}`);
-                      if (el) el.classList.toggle('hidden');
-                    }}
-                    className="w-9 h-9 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground hover:text-primary transition-colors"
+                    onClick={() => { navigator.clipboard.writeText(c.code); toast.success('Copied!'); }}
+                    className="w-8 h-8 rounded-lg bg-secondary/80 flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-secondary transition-colors"
+                    title="Copy code"
                   >
-                    <QrCodeIcon className="w-4 h-4" />
+                    <Copy className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={() => handleDownloadQR(c.code)}
-                    className="w-9 h-9 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground hover:text-primary transition-colors"
+                    className="w-8 h-8 rounded-lg bg-secondary/80 flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-secondary transition-colors"
+                    title="Download QR"
                   >
-                    <Download className="w-4 h-4" />
+                    <Download className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </motion.div>
             ))}
-            {/* Hidden QR canvases for download */}
-            <div className="hidden">
-              {codes.map(c => (
-                <QRCodeCanvas key={c.id} id={`qr-${c.code}`} value={c.code} size={256} bgColor="#ffffff" fgColor="#000000" />
-              ))}
-            </div>
+          </div>
+
+          {/* Hidden QR canvases for download */}
+          <div className="hidden">
+            {codes.map(c => (
+              <QRCodeCanvas key={c.id} id={`qr-${c.code}`} value={c.code} size={256} bgColor="#ffffff" fgColor="#000000" />
+            ))}
           </div>
         </motion.div>
       </div>
