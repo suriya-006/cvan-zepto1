@@ -10,10 +10,16 @@ export function useCodes() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('codes')
-        .select('*')
-        .order('code', { ascending: true });
+        .select('*');
       if (error) throw error;
-      return data as { id: string; code: string; created_at: string }[];
+      const rows = data as { id: string; code: string; created_at: string }[];
+      // Sort: shorter codes first, then alphabetically
+      rows.sort((a, b) => {
+        const lenDiff = a.code.length - b.code.length;
+        if (lenDiff !== 0) return lenDiff;
+        return a.code.localeCompare(b.code);
+      });
+      return rows;
     },
   });
 
