@@ -25,6 +25,17 @@ export function useCodes() {
 
   const addCode = useMutation({
     mutationFn: async (code: string) => {
+      // Check duplicate
+      const { data: existing } = await supabase
+        .from('codes')
+        .select('id')
+        .eq('code', code)
+        .maybeSingle();
+
+      if (existing) {
+        throw new Error('Code already exists');
+      }
+
       const { data, error } = await supabase
         .from('codes')
         .insert({ code })
