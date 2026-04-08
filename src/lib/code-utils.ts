@@ -46,14 +46,14 @@ export function parseVoiceInput(transcript: string): string | null {
   const parts: string[] = [];
   for (const w of words) {
     // Handle combined like "A1" as a single token
-    const combo = w.match(/^([A-L])(\d)$/);
+    const combo = w.match(/^([A-L])(\d+)$/);
     if (combo) {
       parts.push(combo[1], combo[2]);
     } else if (numberWords[w]) {
       parts.push(numberWords[w]);
     } else if (/^[A-L]$/.test(w)) {
       parts.push(w);
-    } else if (/^\d$/.test(w)) {
+    } else if (/^\d+$/.test(w)) {
       parts.push(w);
     }
   }
