@@ -98,7 +98,7 @@ export default function Index() {
 
         {/* Input Card */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass rounded-2xl p-6 mb-8 space-y-4">
-          <p className="text-sm text-muted-foreground">Type a code (e.g. A1A1) or use voice input</p>
+          <p className="text-sm text-muted-foreground">Type a code (e.g. A1 or A1A1) to search saved codes</p>
           <div className="flex gap-2">
             <Input
               placeholder="A1A1"
@@ -106,7 +106,7 @@ export default function Index() {
               onChange={(e) => setValue(e.target.value.toUpperCase())}
               maxLength={4}
               className="bg-secondary border-primary/40 font-mono text-lg tracking-widest h-12 focus:border-primary focus:ring-primary"
-              onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             />
             <Button
               variant="outline"
@@ -118,23 +118,25 @@ export default function Index() {
             </Button>
           </div>
           {value && preview && (
-            <p className="text-sm font-mono text-primary neon-text">{preview}</p>
+            <p className={`text-sm font-mono ${matchingCode ? 'text-primary neon-text' : 'text-muted-foreground'}`}>
+              {preview} {matchingCode ? '✓ Found' : '— Not found'}
+            </p>
           )}
           {value && !preview && (
             <p className="text-sm font-mono text-destructive">Invalid format</p>
           )}
           <Button
-            onClick={handleGenerate}
-            disabled={!preview || addCode.isPending}
+            onClick={handleSearch}
+            disabled={!preview || !matchingCode}
             className="w-full h-12 text-base font-semibold gap-2"
           >
-            <Zap className="w-5 h-5" /> Generate Code
+            <Search className="w-5 h-5" /> Show Code
           </Button>
         </motion.div>
 
         {/* QR Preview */}
         <div className="mb-8">
-          <QRPreview code={lastCode} />
+          <QRPreview code={selectedCode} />
         </div>
 
         {/* Generated Codes by Letter */}
