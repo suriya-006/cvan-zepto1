@@ -27,6 +27,12 @@ export function parseInput(input: string): string | null {
       return `CVAN-${l1}-${num1}-${l2}-${num2}`;
   }
 
+  // Pure number: 8900351614516 → CVAN-8900351614516
+  const matchNum = cleaned.match(/^(\d{4,})$/);
+  if (matchNum) {
+    return `CVAN-${matchNum[1]}`;
+  }
+
   return null;
 }
 
