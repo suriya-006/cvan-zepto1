@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { QRCodeCanvas } from 'qrcode.react';
 
 export default function Index() {
-  const { codes, isLoading, addCode } = useCodes();
+  const { codes, isLoading } = useCodes();
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
   const [value, setValue] = useState('');
   const [listening, setListening] = useState(false);
