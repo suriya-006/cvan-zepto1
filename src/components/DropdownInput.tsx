@@ -2,7 +2,11 @@ import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FIRST_LETTERS, SECOND_LETTERS, NUMBERS, formatCode } from '@/lib/code-utils';
+import { FIRST_LETTERS, SECOND_LETTERS, NUMBERS } from '@/lib/code-utils';
+
+function formatCodeLegacy(l1: string, n1: number, l2: string, n2: number): string {
+  return `CVAN-${l1.toUpperCase()}-${n1}-${l2.toUpperCase()}-${n2}`;
+}
 
 interface Props {
   onGenerate: (code: string) => void;
@@ -16,7 +20,7 @@ export default function DropdownInput({ onGenerate, isPending }: Props) {
   const [n2, setN2] = useState('');
 
   const isValid = l1 && n1 && l2 && n2;
-  const preview = isValid ? formatCode(l1, parseInt(n1), l2, parseInt(n2)) : null;
+  const preview = isValid ? formatCodeLegacy(l1, parseInt(n1), l2, parseInt(n2)) : null;
 
   const handleGenerate = () => {
     if (preview) {

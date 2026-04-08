@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Keyboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { parseManualInput } from '@/lib/code-utils';
+import { parseInput as parseManualInput } from '@/lib/code-utils';
 
 interface Props {
   onGenerate: (code: string) => void;

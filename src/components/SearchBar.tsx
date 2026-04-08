@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { parseManualInput } from '@/lib/code-utils';
+import { parseInput as parseManualInput } from '@/lib/code-utils';
 
 interface Props {
   codes: { id: string; code: string; created_at: string }[];
