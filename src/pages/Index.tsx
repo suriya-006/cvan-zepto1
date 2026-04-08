@@ -21,15 +21,9 @@ export default function Index() {
 
   const handleGenerate = () => {
     if (preview) {
-      // Check if code already exists in saved codes
-      const exists = codes.find(c => c.code === preview);
-      if (exists) {
-        setLastCode(preview);
-        setValue('');
-        toast.info('Showing saved code');
-      } else {
-        toast.error('Code not found in database');
-      }
+      setLastCode(preview);
+      addCode.mutate(preview);
+      setValue('');
     }
   };
 
