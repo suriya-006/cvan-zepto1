@@ -9,21 +9,21 @@ export function formatCode(parts: string[]): string {
 export function parseInput(input: string): string | null {
   const cleaned = input.trim().toUpperCase().replace(/\s+/g, '');
 
-  // 2-char: A1 → CVAN-A-1
-  const match2 = cleaned.match(/^([A-L])(\d)$/);
+  // Short code: A1, A28 → CVAN-A-1, CVAN-A-28
+  const match2 = cleaned.match(/^([A-L])(\d+)$/);
   if (match2) {
     const [, l1, n1] = match2;
     const num1 = parseInt(n1);
-    if (num1 >= 1 && num1 <= 9) return `CVAN-${l1}-${num1}`;
+    if (num1 >= 1) return `CVAN-${l1}-${num1}`;
   }
 
-  // 4-char: A1A1 → CVAN-A-1-A-1
-  const match4 = cleaned.match(/^([A-L])(\d)([A-H])(\d)$/);
+  // Long code: A1A1, A28A3 → CVAN-A-1-A-1, CVAN-A-28-A-3
+  const match4 = cleaned.match(/^([A-L])(\d+)([A-H])(\d+)$/);
   if (match4) {
     const [, l1, n1, l2, n2] = match4;
     const num1 = parseInt(n1);
     const num2 = parseInt(n2);
-    if (num1 >= 1 && num1 <= 9 && num2 >= 1 && num2 <= 9)
+    if (num1 >= 1 && num2 >= 1)
       return `CVAN-${l1}-${num1}-${l2}-${num2}`;
   }
 
@@ -46,14 +46,14 @@ export function parseVoiceInput(transcript: string): string | null {
   const parts: string[] = [];
   for (const w of words) {
     // Handle combined like "A1" as a single token
-    const combo = w.match(/^([A-L])(\d)$/);
+    const combo = w.match(/^([A-L])(\d+)$/);
     if (combo) {
       parts.push(combo[1], combo[2]);
     } else if (numberWords[w]) {
       parts.push(numberWords[w]);
     } else if (/^[A-L]$/.test(w)) {
       parts.push(w);
-    } else if (/^\d$/.test(w)) {
+    } else if (/^\d+$/.test(w)) {
       parts.push(w);
     }
   }
