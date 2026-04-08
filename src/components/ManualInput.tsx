@@ -27,10 +27,10 @@ export default function ManualInput({ onGenerate, isPending }: Props) {
       </label>
       <div className="flex gap-2">
         <Input
-          placeholder="e.g. A1A1"
+          placeholder="e.g. A1A1 or 8900351614516"
           value={value}
           onChange={(e) => setValue(e.target.value.toUpperCase())}
-          maxLength={10}
+          maxLength={20}
           className="bg-secondary border-border font-mono text-lg tracking-widest"
           onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
         />
