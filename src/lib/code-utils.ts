@@ -2,19 +2,32 @@ export const FIRST_LETTERS = 'ABCDEFGHIJKL'.split('');
 export const SECOND_LETTERS = 'ABCDEFGH'.split('');
 export const NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-export function formatCode(l1: string, n1: number, l2: string, n2: number): string {
-  return `CVAN-${l1.toUpperCase()}-${n1}-${l2.toUpperCase()}-${n2}`;
+export function formatCode(parts: string[]): string {
+  return `CVAN-${parts.join('-')}`;
 }
 
-export function parseManualInput(input: string): string | null {
+export function parseInput(input: string): string | null {
   const cleaned = input.trim().toUpperCase().replace(/\s+/g, '');
-  const match = cleaned.match(/^([A-L])(\d)([A-H])(\d)$/);
-  if (!match) return null;
-  const [, l1, n1, l2, n2] = match;
-  const num1 = parseInt(n1);
-  const num2 = parseInt(n2);
-  if (num1 < 1 || num1 > 9 || num2 < 1 || num2 > 9) return null;
-  return formatCode(l1, num1, l2, num2);
+
+  // 2-char: A1 → CVAN-A-1
+  const match2 = cleaned.match(/^([A-L])(\d)$/);
+  if (match2) {
+    const [, l1, n1] = match2;
+    const num1 = parseInt(n1);
+    if (num1 >= 1 && num1 <= 9) return `CVAN-${l1}-${num1}`;
+  }
+
+  // 4-char: A1A1 → CVAN-A-1-A-1
+  const match4 = cleaned.match(/^([A-L])(\d)([A-H])(\d)$/);
+  if (match4) {
+    const [, l1, n1, l2, n2] = match4;
+    const num1 = parseInt(n1);
+    const num2 = parseInt(n2);
+    if (num1 >= 1 && num1 <= 9 && num2 >= 1 && num2 <= 9)
+      return `CVAN-${l1}-${num1}-${l2}-${num2}`;
+  }
+
+  return null;
 }
 
 export function parseVoiceInput(transcript: string): string | null {
@@ -31,9 +44,23 @@ export function parseVoiceInput(transcript: string): string | null {
     else if (/^\d$/.test(w)) parts.push(w);
   }
 
-  if (parts.length !== 4) return null;
-  const [l1, n1, l2, n2] = parts;
-  if (!/^[A-L]$/.test(l1) || !/^[A-H]$/.test(l2)) return null;
-  if (!/^[1-9]$/.test(n1) || !/^[1-9]$/.test(n2)) return null;
-  return formatCode(l1, parseInt(n1), l2, parseInt(n2));
+  if (parts.length === 2) {
+    const [l1, n1] = parts;
+    if (/^[A-L]$/.test(l1) && /^[1-9]$/.test(n1))
+      return `CVAN-${l1}-${n1}`;
+  }
+
+  if (parts.length === 4) {
+    const [l1, n1, l2, n2] = parts;
+    if (/^[A-L]$/.test(l1) && /^[A-H]$/.test(l2) && /^[1-9]$/.test(n1) && /^[1-9]$/.test(n2))
+      return `CVAN-${l1}-${parseInt(n1)}-${l2}-${parseInt(n2)}`;
+  }
+
+  return null;
+}
+
+export function getFirstLetter(code: string): string {
+  // CVAN-A-1 or CVAN-A-1-A-1 → A
+  const parts = code.split('-');
+  return parts[1] || '';
 }
