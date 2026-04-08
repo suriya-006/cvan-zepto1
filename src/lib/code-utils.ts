@@ -31,7 +31,13 @@ export function parseInput(input: string): string | null {
 }
 
 export function parseVoiceInput(transcript: string): string | null {
-  const words = transcript.trim().toUpperCase().replace(/\s+/g, ' ').split(' ');
+  const cleaned = transcript.trim().toUpperCase().replace(/\s+/g, ' ');
+  
+  // First try parsing as direct input (handles "A1", "A1A1" etc.)
+  const directParse = parseInput(cleaned.replace(/\s+/g, ''));
+  if (directParse) return directParse;
+
+  const words = cleaned.split(' ');
   const numberWords: Record<string, string> = {
     ONE: '1', TWO: '2', THREE: '3', FOUR: '4', FIVE: '5',
     SIX: '6', SEVEN: '7', EIGHT: '8', NINE: '9',
@@ -39,9 +45,17 @@ export function parseVoiceInput(transcript: string): string | null {
 
   const parts: string[] = [];
   for (const w of words) {
-    if (numberWords[w]) parts.push(numberWords[w]);
-    else if (/^[A-L]$/.test(w)) parts.push(w);
-    else if (/^\d$/.test(w)) parts.push(w);
+    // Handle combined like "A1" as a single token
+    const combo = w.match(/^([A-L])(\d)$/);
+    if (combo) {
+      parts.push(combo[1], combo[2]);
+    } else if (numberWords[w]) {
+      parts.push(numberWords[w]);
+    } else if (/^[A-L]$/.test(w)) {
+      parts.push(w);
+    } else if (/^\d$/.test(w)) {
+      parts.push(w);
+    }
   }
 
   if (parts.length === 2) {
