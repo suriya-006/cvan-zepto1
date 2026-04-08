@@ -30,7 +30,7 @@ export default function ManualInput({ onGenerate, isPending }: Props) {
           placeholder="e.g. A1A1"
           value={value}
           onChange={(e) => setValue(e.target.value.toUpperCase())}
-          maxLength={4}
+          maxLength={10}
           className="bg-secondary border-border font-mono text-lg tracking-widest"
           onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
         />
