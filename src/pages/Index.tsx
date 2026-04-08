@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { QrCode, Mic, MicOff, Zap, Download, QrCodeIcon, Copy } from 'lucide-react';
+import { QrCode, Mic, MicOff, Search, Download, QrCodeIcon, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import QRPreview from '@/components/QRPreview';
@@ -10,8 +10,8 @@ import { toast } from 'sonner';
 import { QRCodeCanvas } from 'qrcode.react';
 
 export default function Index() {
-  const { codes, isLoading, addCode } = useCodes();
-  const [lastCode, setLastCode] = useState<string | null>(null);
+  const { codes, isLoading } = useCodes();
+  const [selectedCode, setSelectedCode] = useState<string | null>(null);
   const [value, setValue] = useState('');
   const [listening, setListening] = useState(false);
   const [activeLetter, setActiveLetter] = useState('A');
@@ -19,11 +19,15 @@ export default function Index() {
 
   const preview = parseInput(value);
 
-  const handleGenerate = () => {
-    if (preview) {
-      setLastCode(preview);
-      addCode.mutate(preview);
+  // Find matching code from saved codes
+  const matchingCode = preview ? codes.find(c => c.code === preview) : null;
+
+  const handleSearch = () => {
+    if (matchingCode) {
+      setSelectedCode(matchingCode.code);
       setValue('');
+    } else if (preview) {
+      toast.error(`Code "${preview}" not found in database`);
     }
   };
 
@@ -38,9 +42,13 @@ export default function Index() {
       const text = event.results[0][0].transcript;
       const parsed = parseVoiceInput(text);
       if (parsed) {
-        setValue('');
-        setLastCode(parsed);
-        addCode.mutate(parsed);
+        const found = codes.find(c => c.code === parsed);
+        if (found) {
+          setValue('');
+          setSelectedCode(found.code);
+        } else {
+          toast.error(`Code "${parsed}" not found in database`);
+        }
       } else {
         toast.error(`Could not parse: "${text}"`);
       }
@@ -90,7 +98,7 @@ export default function Index() {
 
         {/* Input Card */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass rounded-2xl p-6 mb-8 space-y-4">
-          <p className="text-sm text-muted-foreground">Type a code (e.g. A1A1) or use voice input</p>
+          <p className="text-sm text-muted-foreground">Type a code (e.g. A1 or A1A1) to search saved codes</p>
           <div className="flex gap-2">
             <Input
               placeholder="A1A1"
@@ -98,7 +106,7 @@ export default function Index() {
               onChange={(e) => setValue(e.target.value.toUpperCase())}
               maxLength={4}
               className="bg-secondary border-primary/40 font-mono text-lg tracking-widest h-12 focus:border-primary focus:ring-primary"
-              onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             />
             <Button
               variant="outline"
@@ -110,23 +118,25 @@ export default function Index() {
             </Button>
           </div>
           {value && preview && (
-            <p className="text-sm font-mono text-primary neon-text">{preview}</p>
+            <p className={`text-sm font-mono ${matchingCode ? 'text-primary neon-text' : 'text-muted-foreground'}`}>
+              {preview} {matchingCode ? '✓ Found' : '— Not found'}
+            </p>
           )}
           {value && !preview && (
             <p className="text-sm font-mono text-destructive">Invalid format</p>
           )}
           <Button
-            onClick={handleGenerate}
-            disabled={!preview || addCode.isPending}
+            onClick={handleSearch}
+            disabled={!preview || !matchingCode}
             className="w-full h-12 text-base font-semibold gap-2"
           >
-            <Zap className="w-5 h-5" /> Generate Code
+            <Search className="w-5 h-5" /> Show Code
           </Button>
         </motion.div>
 
         {/* QR Preview */}
         <div className="mb-8">
-          <QRPreview code={lastCode} />
+          <QRPreview code={selectedCode} />
         </div>
 
         {/* Generated Codes by Letter */}
@@ -180,7 +190,8 @@ export default function Index() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.025, duration: 0.3 }}
-                className="group glass rounded-xl px-4 py-3 flex items-center justify-between hover:border-primary/30 transition-all duration-200"
+                className={`group glass rounded-xl px-4 py-3 flex items-center justify-between hover:border-primary/30 transition-all duration-200 cursor-pointer ${selectedCode === c.code ? 'border-primary/50 bg-primary/5' : ''}`}
+                onClick={() => setSelectedCode(c.code)}
               >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-mono text-xs font-bold border border-primary/20">
