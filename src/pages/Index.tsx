@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { QrCode, Mic, MicOff, Zap, Download, QrCodeIcon, Copy } from 'lucide-react';
+import { QrCode, Mic, MicOff, Search, Download, QrCodeIcon, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import QRPreview from '@/components/QRPreview';
