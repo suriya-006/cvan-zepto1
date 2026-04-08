@@ -190,7 +190,8 @@ export default function Index() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.025, duration: 0.3 }}
-                className="group glass rounded-xl px-4 py-3 flex items-center justify-between hover:border-primary/30 transition-all duration-200"
+                className={`group glass rounded-xl px-4 py-3 flex items-center justify-between hover:border-primary/30 transition-all duration-200 cursor-pointer ${selectedCode === c.code ? 'border-primary/50 bg-primary/5' : ''}`}
+                onClick={() => setSelectedCode(c.code)}
               >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-mono text-xs font-bold border border-primary/20">
