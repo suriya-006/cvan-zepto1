@@ -42,9 +42,13 @@ export default function Index() {
       const text = event.results[0][0].transcript;
       const parsed = parseVoiceInput(text);
       if (parsed) {
-        setValue('');
-        setLastCode(parsed);
-        addCode.mutate(parsed);
+        const found = codes.find(c => c.code === parsed);
+        if (found) {
+          setValue('');
+          setSelectedCode(found.code);
+        } else {
+          toast.error(`Code "${parsed}" not found in database`);
+        }
       } else {
         toast.error(`Could not parse: "${text}"`);
       }
