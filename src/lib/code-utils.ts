@@ -1,5 +1,7 @@
-export const FIRST_LETTERS = 'ABCDEFGHIJKL'.split('');
-export const SECOND_LETTERS = 'ABCDEFGH'.split('');
+const LETTER_SEQUENCE = 'ABCDEFGHIJKL';
+
+export const FIRST_LETTERS = LETTER_SEQUENCE.split('');
+export const SECOND_LETTERS = LETTER_SEQUENCE.split('');
 export const NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 export function formatCode(parts: string[]): string {
@@ -23,7 +25,7 @@ export function parseInput(input: string): string | null {
   }
 
   // Long code: A1A1, A28A3, F26A5 → CVAN-A-1-A-1, CVAN-A-28-A-3, CVAN-F-26-A-5
-  const match4 = cleaned.match(/^([A-L])(\d+)([A-H])(\d+)$/);
+  const match4 = cleaned.match(/^([A-L])(\d+)([A-L])(\d+)$/);
   if (match4) {
     const [, l1, n1, l2, n2] = match4;
     const num1 = parseInt(n1, 10);
@@ -80,7 +82,7 @@ export function parseVoiceInput(transcript: string): string | null {
     const [l1, n1, l2, n2] = parts;
     const num1 = parseInt(n1, 10);
     const num2 = parseInt(n2, 10);
-    if (/^[A-L]$/.test(l1) && /^[A-H]$/.test(l2) && /^\d+$/.test(n1) && /^\d+$/.test(n2) && num1 >= 1 && num2 >= 1) {
+    if (/^[A-L]$/.test(l1) && /^[A-L]$/.test(l2) && /^\d+$/.test(n1) && /^\d+$/.test(n2) && num1 >= 1 && num2 >= 1) {
       return `CVAN-${l1}-${num1}-${l2}-${num2}`;
     }
   }
