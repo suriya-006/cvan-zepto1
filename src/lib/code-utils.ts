@@ -64,7 +64,7 @@ function stripBinPrefix(rawInput: string, binKey: keyof typeof BIN_LABELS): stri
     return normalized.replace(namedPattern, '');
   }
 
-  const shortPattern = new RegExp(`^${binKey}(?=[A-L]|$)`);
+  const shortPattern = new RegExp(`^${binKey}(?:[\\s-]+|(?=[A-L])|$)`);
   return normalized.replace(shortPattern, '');
 }
 
