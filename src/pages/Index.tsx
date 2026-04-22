@@ -1,66 +1,55 @@
-import { useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { QrCode, Mic, MicOff, Zap, Download, QrCodeIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { QrCode, Download, QrCodeIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import QRPreview from '@/components/QRPreview';
 import { useCodes } from '@/hooks/useCodes';
-import { parseInput, parseVoiceInput, FIRST_LETTERS, getFirstLetter } from '@/lib/code-utils';
-import { toast } from 'sonner';
+import { parseInput, FIRST_LETTERS, getFirstLetter, isPotentialCodeInput } from '@/lib/code-utils';
 import { QRCodeCanvas } from 'qrcode.react';
 
 export default function Index() {
   const { codes, isLoading, addCode } = useCodes();
   const [lastCode, setLastCode] = useState<string | null>(null);
   const [value, setValue] = useState('');
-  const [listening, setListening] = useState(false);
   const [activeLetter, setActiveLetter] = useState('A');
-  const recognitionRef = useRef<any>(null);
+  const lastAutoSubmittedRef = useRef<string | null>(null);
 
   const preview = parseInput(value);
   const filterGroups = [...FIRST_LETTERS, '123'];
+  const showInvalidFormat = value.trim().length > 0 && !preview && !isPotentialCodeInput(value);
 
-  const handleGenerate = () => {
-    if (preview) {
+  useEffect(() => {
+    if (!value.trim()) {
+      lastAutoSubmittedRef.current = null;
+      return;
+    }
+
+    if (!preview || addCode.isPending || lastAutoSubmittedRef.current === preview) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      lastAutoSubmittedRef.current = preview;
+
       const nextGroup = getFirstLetter(preview);
       if (nextGroup) {
         setActiveLetter(nextGroup);
       }
-      setLastCode(preview);
-      addCode.mutate(preview);
-      setValue('');
-    }
-  };
 
-  const startListening = () => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) { toast.error('Voice not supported'); return; }
-    const recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = 'en-US';
-    recognition.onresult = (event: any) => {
-      const text = event.results[0][0].transcript;
-      const parsed = parseVoiceInput(text);
-      if (parsed) {
-        const nextGroup = getFirstLetter(parsed);
-        if (nextGroup) {
-          setActiveLetter(nextGroup);
-        }
-        setValue('');
-        setLastCode(parsed);
-        addCode.mutate(parsed);
-      } else {
-        toast.error(`Could not parse: "${text}"`);
-      }
-      setListening(false);
-    };
-    recognition.onerror = () => setListening(false);
-    recognition.onend = () => setListening(false);
-    recognitionRef.current = recognition;
-    recognition.start();
-    setListening(true);
-  };
+      setLastCode(preview);
+      addCode.mutate(preview, {
+        onSuccess: () => {
+          setValue('');
+          lastAutoSubmittedRef.current = null;
+        },
+        onError: () => {
+          lastAutoSubmittedRef.current = null;
+        },
+      });
+    }, 450);
+
+    return () => window.clearTimeout(timer);
+  }, [preview, value, addCode]);
 
   const filteredCodes = codes.filter(c => getFirstLetter(c.code) === activeLetter);
 
@@ -96,38 +85,22 @@ export default function Index() {
         </motion.section>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass rounded-2xl p-6 mb-8 space-y-4">
-          <p className="text-sm text-muted-foreground">Type a code (e.g. A1A1 or 8900351614516) or use voice input</p>
-          <div className="flex gap-2">
+          <p className="text-sm text-muted-foreground">Type a code and it will generate automatically. Use A1A1, F26A5, 8900351614516, or bin codes like S A1A1, D B2, F J8A2.</p>
+          <div>
             <Input
-              placeholder="A1A1 or 8900351614516"
+              placeholder="A1A1, S A1A1, or 8900351614516"
               value={value}
               onChange={(e) => setValue(e.target.value.toUpperCase())}
-              maxLength={24}
+              maxLength={32}
               className="bg-secondary border-primary/40 font-mono text-lg tracking-widest h-12 focus:border-primary focus:ring-primary"
-              onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
             />
-            <Button
-              variant="outline"
-              size="icon"
-              className={`h-12 w-12 shrink-0 ${listening ? 'bg-destructive text-destructive-foreground border-destructive' : 'border-border text-muted-foreground hover:text-primary hover:border-primary/50'}`}
-              onClick={listening ? () => { recognitionRef.current?.stop(); setListening(false); } : startListening}
-            >
-              {listening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-            </Button>
           </div>
           {value && preview && (
-            <p className="text-sm font-mono text-primary neon-text">{preview}</p>
+            <p className="text-sm font-mono text-primary neon-text">{preview} · generating…</p>
           )}
-          {value && !preview && (
+          {showInvalidFormat && (
             <p className="text-sm font-mono text-destructive">Invalid format</p>
           )}
-          <Button
-            onClick={handleGenerate}
-            disabled={!preview || addCode.isPending}
-            className="w-full h-12 text-base font-semibold gap-2"
-          >
-            <Zap className="w-5 h-5" /> Generate Code
-          </Button>
         </motion.div>
 
         <div className="mb-8">
