@@ -40,7 +40,7 @@ function parseStructuredParts(cleaned: string): string[] | null {
 
 function getBinKey(rawInput: string): keyof typeof BIN_LABELS | null {
   const normalized = rawInput.trim().toUpperCase();
-  const compact = normalized.replace(/\s+/g, '');
+  const compact = normalized.replace(/[\s-]+/g, '');
 
   const namedMatch = normalized.match(/^(SCRAPBIN|DAMAGEBIN|FESTIVEBIN)(?:[\s-]+|(?=[A-L])|$)/);
   if (namedMatch) {
