@@ -15,6 +15,13 @@ describe('code-utils', () => {
     expect(parseInput('F J8A2')).toBe('FESTIVEBIN-J-8-A-2');
   });
 
+  it('supports bin prefixes typed directly before the code', () => {
+    expect(parseInput('SA1A1')).toBe('SCRAPBIN-A-1-A-1');
+    expect(parseInput('DB2')).toBe('DAMAGEBIN-B-2');
+    expect(parseInput('FJ8A2')).toBe('FESTIVEBIN-J-8-A-2');
+    expect(parseInput('F26A5')).toBe('CVAN-F-26-A-5');
+  });
+
   it('keeps numeric codes unprefixed', () => {
     expect(parseInput('8900351614516')).toBe('8900351614516');
   });
@@ -27,6 +34,7 @@ describe('code-utils', () => {
   it('treats incomplete but valid progress as a potential code input', () => {
     expect(isPotentialCodeInput('F2')).toBe(true);
     expect(isPotentialCodeInput('S ')).toBe(true);
+    expect(isPotentialCodeInput('SA')).toBe(true);
     expect(isPotentialCodeInput('Z9')).toBe(false);
   });
 });
