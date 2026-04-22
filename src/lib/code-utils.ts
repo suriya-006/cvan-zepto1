@@ -39,14 +39,33 @@ function parseStructuredParts(cleaned: string): string[] | null {
 }
 
 function getBinKey(rawInput: string): keyof typeof BIN_LABELS | null {
-  const match = rawInput.match(/^(SCRAPBIN|DAMAGEBIN|FESTIVEBIN|S|D|F)[\s-]+/);
-  if (!match) return null;
-  return BIN_NAME_TO_KEY[match[1]] ?? null;
+  const normalized = rawInput.trim().toUpperCase();
+  const compact = normalized.replace(/[\s-]+/g, '');
+
+  const namedMatch = normalized.match(/^(SCRAPBIN|DAMAGEBIN|FESTIVEBIN)(?:[\s-]+|(?=[A-L])|$)/);
+  if (namedMatch) {
+    return BIN_NAME_TO_KEY[namedMatch[1]] ?? null;
+  }
+
+  const shortMatch = compact.match(/^([SDF])(?=[A-L]|$)/);
+  if (shortMatch) {
+    return BIN_NAME_TO_KEY[shortMatch[1]] ?? null;
+  }
+
+  return null;
 }
 
 function stripBinPrefix(rawInput: string, binKey: keyof typeof BIN_LABELS): string {
-  const prefixPattern = new RegExp(`^(${binKey}|${BIN_LABELS[binKey]})[\\s-]+`);
-  return rawInput.replace(prefixPattern, '');
+  const normalized = rawInput.trim().toUpperCase();
+  const name = BIN_LABELS[binKey];
+  const namedPattern = new RegExp(`^${name}(?:[\\s-]+|(?=[A-L])|$)`);
+
+  if (namedPattern.test(normalized)) {
+    return normalized.replace(namedPattern, '');
+  }
+
+  const shortPattern = new RegExp(`^${binKey}(?:[\\s-]+|(?=[A-L])|$)`);
+  return normalized.replace(shortPattern, '');
 }
 
 export function formatCode(parts: string[], binKey?: keyof typeof BIN_LABELS): string {
